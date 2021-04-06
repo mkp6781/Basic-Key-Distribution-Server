@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+
+import socket
+import sys, getopt
+
+def parse_args(argv):
+    client_a = ''
+    client_a_role = ''
+    client_b = ''
+    outenc = ''
+    inputfile = ''
+    outputfile = ''
+    kdc_ip = ''
+    kdc_port = ''
+    try:
+        opts, args = getopt.getopt(argv,"n:m:r:s:i:o:a:p:",[])
+    except getopt.GetoptError:
+        print("./client -n <sender name> -m <S> -r <reciever name> -i <inputfile> -a <kdcip> -p <kdcport>")
+        print("./client -n <reciever name> -m <R> -s <encrypted_content_recieved> -o <outputfile> -a <kdcip> -p <kdcport>")
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == "-n":
+            client_a = arg
+        elif opt == "-m":
+            client_a_role = arg
+        elif opt == "-r":
+            client_b = arg
+        elif opt == "-s":
+            outenc = arg
+        elif opt == "-i":
+            inputfile = arg
+        elif opt == "-o":
+            outputfile = arg
+        elif opt == "-a":
+            kdc_ip = arg
+        elif opt == "-p":
+            kdc_port = arg
+    return (client_a, client_a_role, client_b, outenc, inputfile, outputfile, kdc_ip, kdc_port)
+
+if __name__ == "__main__":
+    (client_a, client_a_role, client_b, outenc, inputfile, outputfile, kdc_ip, kdc_port) = parse_args(sys.argv[1:])
+
+
+
+
+# # create an INET, TCP socket
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# # now connect to the web server on port  - the normal http port
+# s.connect(('localhost', ))

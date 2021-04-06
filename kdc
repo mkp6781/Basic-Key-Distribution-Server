@@ -1,0 +1,48 @@
+#!/usr/bin/python3
+
+import socket
+import sys, getopt
+
+def parse_args(argv):
+    portid = ''
+    outputfile = ''
+    pwdfile = ''
+    try:
+        opts, args = getopt.getopt(argv,"p:o:f:",[])
+    except getopt.GetoptError:
+        print('./kdc -p 12345 -o out.txt -f pwd.txt')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == "-p":
+            portid = arg
+        elif opt == "-o":
+            outputfile = arg
+        elif opt == "-f":
+            pwdfile = arg
+    return (portid, outputfile , pwdfile)
+
+def main():
+    pass
+
+if __name__ == "__main__":
+   portid, outputfile , pwdfile = parse_args(sys.argv[1:])
+   print(portid, outputfile , pwdfile)
+   main()
+
+
+
+# serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# # bind the socket to a public host, and a port
+# serversocket.bind(('localhost', 50000))
+# # becomes a server socket
+# serversocket.listen(5)
+
+# while True:
+#     # accept connections from clients
+#     (clientconnection, address) = serversocket.accept()
+#     # now do something with the clientsocket
+#     try:
+
+#     # in this case, we'll pretend this is a threaded server
+#     ct = client_thread(clientconnection)
+#     ct.run()
