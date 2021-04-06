@@ -37,13 +37,14 @@ def parse_args(argv):
             kdc_port = arg
     return (client_a, client_a_role, client_b, outenc, inputfile, outputfile, kdc_ip, kdc_port)
 
+def main():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((kdc_ip, int(kdc_port)))
+        s.sendall(b'Hello, world')
+        data = s.recv(1024)
+        print('Received', data)
+
+
 if __name__ == "__main__":
     (client_a, client_a_role, client_b, outenc, inputfile, outputfile, kdc_ip, kdc_port) = parse_args(sys.argv[1:])
-
-
-
-
-# # create an INET, TCP socket
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# # now connect to the web server on port  - the normal http port
-# s.connect(('localhost', ))
+    main()

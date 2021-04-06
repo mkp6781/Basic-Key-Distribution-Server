@@ -22,27 +22,23 @@ def parse_args(argv):
     return (portid, outputfile , pwdfile)
 
 def main():
-    pass
+    # setting up a listening socket for kdc server.
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serversocket:
+        serversocket.bind(('localhost', int(portid)))
+        serversocket.listen(5)
+        print(f"Listening on port {int(portid)}")
+        print("Waiting for connection from client.......")
+        # client_connection_socket is different from serversocket. 
+        # This new socket obejct is used for communication between client and server
+        (client_connection_socket, address) = serversocket.accept()
+        with client_connection_socket:
+            print('Connected by', address)
+            while True:
+                data = client_connection_socket.recv(1024)
+                if not data:
+                    break
+                client_connection_socket.sendall(data)
 
 if __name__ == "__main__":
-   portid, outputfile , pwdfile = parse_args(sys.argv[1:])
-   print(portid, outputfile , pwdfile)
+   portid, outputfile, pwdfile = parse_args(sys.argv[1:])
    main()
-
-
-
-# serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# # bind the socket to a public host, and a port
-# serversocket.bind(('localhost', 50000))
-# # becomes a server socket
-# serversocket.listen(5)
-
-# while True:
-#     # accept connections from clients
-#     (clientconnection, address) = serversocket.accept()
-#     # now do something with the clientsocket
-#     try:
-
-#     # in this case, we'll pretend this is a threaded server
-#     ct = client_thread(clientconnection)
-#     ct.run()
