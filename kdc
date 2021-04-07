@@ -1,7 +1,14 @@
 #!/usr/bin/python3
 
+import base64
+from cryptography.hazmat.primitives import hashes
+import json
+from pathlib import Path, PurePath
 import socket
 import sys, getopt
+
+OUTPUT_FILE = Path(__file__).resolve().parent
+
 
 def parse_args(argv):
     portid = ''
@@ -29,15 +36,44 @@ def main():
         print(f"Listening on port {int(portid)}")
         print("Waiting for connection from client.......")
         # client_connection_socket is different from serversocket. 
-        # This new socket obejct is used for communication between client and server
-        (client_connection_socket, address) = serversocket.accept()
-        with client_connection_socket:
+        # This new socket object is used for communication between client and server
+        while True:
+            (client_connection_socket, address) = serversocket.accept()
             print('Connected by', address)
             while True:
                 data = client_connection_socket.recv(1024)
                 if not data:
                     break
-                client_connection_socket.sendall(data)
+                data = json.loads(data)
+                if data['type'] == "Registration":
+                    plain_text = data['passwd']+data['name']
+                    # encrypt plain_text using MD5 hash and store as secret key.
+                    digest = hashes.Hash(hashes.MD5())
+                    digest.update(bytes(plain_text, encoding='utf-8'))
+                    hashed_pass = digest.finalize()
+                    hashed_pass = base64.b64encode(hashed_pass)
+                    user_data = f":{data['name']}:{data['ip']}:{data['tcp_port']}:{str(hashed_pass)}:\n"
+                    lines = []
+                    # kdc storing user info in file.
+                    with open(OUTPUT_FILE / pwdfile, "r+") as pwd:
+                        lines = pwd.readlines()
+                    with open(OUTPUT_FILE / pwdfile, "w") as pwd:
+                        same_username_exists = False
+                        for line in lines:
+                            content = line.split(":")
+                            if content[1] == data["name"]:
+                                pwd.write(user_data)
+                                same_username_exists = True
+                            else:
+                                pwd.write(line)
+                        if not same_username_exists:
+                            pwd.write(user_data)
+                    reply = {
+                        "code": 302,
+                        "name": data["name"]
+                    }
+                json_format_reply = json.dumps(reply).encode('utf-8')
+                client_connection_socket.sendall(json_format_reply)
 
 if __name__ == "__main__":
    portid, outputfile, pwdfile = parse_args(sys.argv[1:])

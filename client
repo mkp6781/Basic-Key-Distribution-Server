@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import json
 import socket
 import sys, getopt
 
@@ -40,9 +41,49 @@ def parse_args(argv):
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((kdc_ip, int(kdc_port)))
-        s.sendall(b'Hello, world')
-        data = s.recv(1024)
-        print('Received', data)
+        data = dict()
+        if client_a_role == "S":
+            new_client = input("Are you a new client(y/n): ")
+            if new_client == "y":
+                # Registration with KDC
+                print("Please register with KDC....")
+                # u_id = input("Enter user id(integer): ")
+                # ip = input("Enter ip address(15 characters max): ")
+                # tcp_port = input("Enter port number: ")
+                # passwd = input("Enter password(number of characters-12): ")
+                # name = input("Enter name(a-z, max. string length-12): ")
+                # data = {
+                #     'type': 'Registration',
+                #     'code': 301,
+                #     'user_id': int(u_id),
+                #     'ip': ip,
+                #     'tcp_port': int(tcp_port),
+                #     'passwd': passwd,
+                #     'name': name
+                # }
+                # Hardcoded values-for testing
+                data = {
+                    'type': 'Registration',
+                    'code': 301,
+                    'user_id': 1, #int(u_id),
+                    'ip': "10.1.1.1", #ip
+                    'tcp_port': 12314, #int(tcp_port),
+                    'passwd': 'haeallo', #passwd,
+                    'name': 'abin' #name
+                }
+            else:
+                # TODO: Add support for sending message to another user
+                send_msg = input("Do you wish to send a message?(y/n): ")
+                # if send_msg:
+                # data = {
+                #     'type': 'Message',
+                #     'id': ,
+                # }
+            if data:
+                json_format_data = json.dumps(data).encode('utf-8')
+                s.sendall(json_format_data)
+                response = s.recv(1024)
+                print('Received', response)
 
 
 if __name__ == "__main__":
