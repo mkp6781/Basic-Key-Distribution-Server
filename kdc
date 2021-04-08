@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
-from helper import md5_hash
+from base64 import b64encode
+from cryptography.fernet import Fernet
+from helper import derive_key, encrypt_msg, get_secret_key, get_user_info, md5_hash
 import json
+import os
 from pathlib import Path, PurePath
 import socket
 import sys, getopt
@@ -46,7 +49,8 @@ def main():
                 data = json.loads(data)
                 if data['type'] == "Registration":
                     plain_text = data['passwd']+data['name']
-                    hashed_pass_string = md5_hash(plain_text)
+                    base64_hashed_pass_bytes = md5_hash(plain_text)
+                    hashed_pass_string = base64_hashed_pass_bytes.decode("utf-8")
                     user_data = f":{data['name']}:{data['ip']}:{data['tcp_port']}:{hashed_pass_string}:\n"
                     lines = []
                     # kdc storing user info in file.
@@ -66,6 +70,49 @@ def main():
                     reply = {
                         "code": 302,
                         "name": data["name"]
+                    }
+                elif data['type'] == 'Message':
+                    # Get details and password salt of sender.
+                    (ip_addr_sender, portno_sender, salt_string) = get_user_info(OUTPUT_FILE, pwdfile, data['sender'])
+                    secret_key_sender = get_secret_key(salt_string)
+
+                    # Decrypt encrypted message using shared secret key with sender.
+                    f = Fernet(secret_key_sender)
+                    encrypted_msg_from_sender = json.dumps(data['encrypted_message']).encode('utf-8')
+                    decrypted_content = f.decrypt(encrypted_msg_from_sender)
+                    decrypted_content = json.loads(decrypted_content)
+
+                    # Get details and password salt of reciever.
+                    (ip_addr_reciever, portno_reciever, salt_string) = get_user_info(OUTPUT_FILE, pwdfile, decrypted_content['reciever'])
+                    secret_key_reciever = get_secret_key(salt_string)
+                    session_key_bytes = os.urandom(8)
+                    session_key = b64encode(session_key_bytes).decode('utf-8')
+
+                    # Messages to both users
+                    message_to_sender = {
+                        'session_key': session_key,
+                        'id_sender': data['sender'],
+                        'id_reciever': decrypted_content['reciever'],
+                        'nonce': decrypted_content['nonce'],
+                        'ip_reciever': ip_addr_reciever,
+                        'port_reciever': portno_reciever
+                    }
+                    message_to_reciever = {
+                        'session_key': session_key,
+                        'id_sender': data['sender'],
+                        'id_reciever': decrypted_content['reciever'],
+                        'nonce': decrypted_content['nonce'],
+                        'ip_reciever': ip_addr_sender,
+                        'port_reciever': portno_sender
+                    }
+
+                    # Encrypt messages to both users using their respective keys.
+                    encrypted_message_to_sender = encrypt_msg(secret_key_sender, message_to_sender)
+                    encrypted_message_to_reciever = encrypt_msg(secret_key_reciever, message_to_reciever)
+                    reply = {
+                        'code': 306,
+                        'msg_to_sender_encrypted': encrypted_message_to_sender,
+                        'msg_to_reciever_encrypted': encrypted_message_to_reciever
                     }
                 json_format_reply = json.dumps(reply).encode('utf-8')
                 client_connection_socket.sendall(json_format_reply)

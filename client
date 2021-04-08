@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
-from helper import send_message
+from cryptography.fernet import Fernet
+from helper import derive_key, encrypt_msg, send_message, md5_hash
 import json
 import getopt
+import random
 import socket, sys
 
 def parse_args(argv):
@@ -69,11 +71,48 @@ def main():
                 'ip': "10.1.1.1", #ip
                 'tcp_port': 12314, #int(tcp_port),
                 'passwd': 'jaskd', #passwd,
-                'name': 'john' #name
+                'name': 'tom' #name
             }
-            response = send_message(data, s)
+            send_message(data, s)
+            response = s.recv(1024)
+            response = json.loads(response)
             if ((response['code'] == 302) and (response['name'] == data['name'])):
                 print("Registration Succesful!! :)")
+
+        if client_a_role == "S":
+            send_msg = input("Do you wish to send a message?(y/n): ")
+            if send_msg == "y":
+                # Message to be sent to kdc to obtain session key for
+                # communication with another user.
+                passwd = input("Enter your password: ")
+                plain_pass = passwd+client_a
+                salt = md5_hash(plain_pass)
+                secret_key = derive_key(salt)
+                msg_to_encrypt = {
+                    'sender': client_a,
+                    'reciever': client_b,
+                    'nonce': random.randint(1,300)
+                }
+                encrypted_msg = encrypt_msg(secret_key, msg_to_encrypt)
+                data = {
+                    'type': 'Message',
+                    'code': 305,
+                    'sender': client_a,
+                    'encrypted_message': encrypted_msg
+                }
+                send_message(data, s)
+                response = json.loads(s.recv(1024))
+                if response['code'] == 306:
+                    f = Fernet(secret_key)
+                    encrypted_msg_to_sender = json.dumps(response['msg_to_sender_encrypted']).encode('utf-8')
+                    decrypted_response = f.decrypt(encrypted_msg_to_sender)
+                    decrypted_response = json.loads(decrypted_response)
+                    print(f"This is the secret key: {decrypted_response['session_key']}")
+                    message_to_reciever = {
+                        'code': 309,
+                        'to_reciever': response['msg_to_reciever_encrypted'],
+                        'sender': client_a
+                    }
 
 
 if __name__ == "__main__":
