@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
+from helper import send_message
 import json
 import getopt
 import socket, sys
-import time
 
 def parse_args(argv):
     client_a = ''
@@ -39,13 +39,6 @@ def parse_args(argv):
             kdc_port = arg
     return (client_a, client_a_role, client_b, outenc, inputfile, outputfile, kdc_ip, kdc_port)
 
-def send_message(data: dict, s: socket) -> str:
-    json_format_data = json.dumps(data).encode('utf-8')
-    s.sendall(json_format_data)
-    response = s.recv(1024)
-    response = json.loads(response)
-    return response
-
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((kdc_ip, int(kdc_port)))
@@ -76,20 +69,11 @@ def main():
                 'ip': "10.1.1.1", #ip
                 'tcp_port': 12314, #int(tcp_port),
                 'passwd': 'jaskd', #passwd,
-                'name': 'zameel' #name
+                'name': 'john' #name
             }
             response = send_message(data, s)
-            time.sleep(2)
             if ((response['code'] == 302) and (response['name'] == data['name'])):
                 print("Registration Succesful!! :)")
-        if client_a_role == "S":
-            # TODO: Add support for sending message to another user
-            send_msg = input("Do you wish to send a message?(y/n): ")
-            # if send_msg:
-            # data = {
-            #     'type': 'Message',
-            #     'id': ,
-            # }
 
 
 if __name__ == "__main__":

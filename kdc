@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import base64
-from cryptography.hazmat.primitives import hashes
+from helper import md5_hash
 import json
 from pathlib import Path, PurePath
 import socket
@@ -47,12 +46,8 @@ def main():
                 data = json.loads(data)
                 if data['type'] == "Registration":
                     plain_text = data['passwd']+data['name']
-                    # encrypt plain_text using MD5 hash and store as secret key.
-                    digest = hashes.Hash(hashes.MD5())
-                    digest.update(bytes(plain_text, encoding='utf-8'))
-                    hashed_pass = digest.finalize()
-                    hashed_pass = base64.b64encode(hashed_pass)
-                    user_data = f":{data['name']}:{data['ip']}:{data['tcp_port']}:{str(hashed_pass)}:\n"
+                    hashed_pass_string = md5_hash(plain_text)
+                    user_data = f":{data['name']}:{data['ip']}:{data['tcp_port']}:{hashed_pass_string}:\n"
                     lines = []
                     # kdc storing user info in file.
                     with open(OUTPUT_FILE / pwdfile, "r+") as pwd:
