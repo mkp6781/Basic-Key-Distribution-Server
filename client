@@ -50,8 +50,8 @@ def main():
         if new_client == "y":
             # Registration with KDC
             print("Please register with KDC....")
-            passwd = input("Enter password(number of characters-12): ")
             name = input("Enter name(a-z, max. string length-12): ")
+            passwd = input("Enter password(number of characters-12): ")
             data = {
                 'type': 'Registration',
                 'code': 301,
@@ -71,7 +71,7 @@ def main():
             if send_msg == "y":
                 # Message to be sent to kdc to obtain session key for
                 # communication with another user.
-                passwd = input("Enter your password: ")
+                passwd = input("Enter sender password: ")
                 plain_pass = passwd+client_a
                 salt = md5_hash(plain_pass)
                 secret_key = derive_key(salt)
@@ -126,7 +126,7 @@ def main():
                         break
                     data = json.loads(data)
                     if data['code'] == 309:
-                        passwd = input("Enter your password: ")
+                        passwd = input("Enter reciever password: ")
                         plain_pass = passwd+client_a
                         salt = md5_hash(plain_pass)
                         secret_key = derive_key(salt)

@@ -1,0 +1,19 @@
+Script started on 2021-04-09 16:08:30+05:30 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="101" LINES="55"]
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ exit[C./kdc -p 12345 -o out.txt -f pwd.txt
+Listening on port 12345
+Waiting for connection from client.......
+Connection from ('127.0.0.1', 56502)
+Connection from ('127.0.0.1', 56504)
+^CTraceback (most recent call last):
+  File "./kdc", line 119, in <module>
+    main()
+  File "./kdc", line 43, in main
+    (client_connection_socket, address) = serversocket.accept()
+  File "/usr/lib/python3.8/socket.py", line 292, in accept
+    fd, addr = self._accept()
+KeyboardInterrupt
+
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ exit
+exit
+
+Script done on 2021-04-09 16:09:58+05:30 [COMMAND_EXIT_CODE="130"]

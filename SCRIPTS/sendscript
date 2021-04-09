@@ -1,0 +1,13 @@
+Script started on 2021-04-09 16:09:10+05:30 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="101" LINES="55"]
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ ./client -n tom -m S -r manu -i in.txt -a 127.0.0.1 -p 12345
+Are you a new client(y/n): y
+Please register with KDC....
+Enter password(number of characters-12): tom
+Enter name(a-z, max. string length-12): tom
+Registration Succesful!! :)
+Do you wish to send a message?(y/n): y
+Enter your password: tom
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ exit
+exit
+
+Script done on 2021-04-09 16:10:04+05:30 [COMMAND_EXIT_CODE="0"]

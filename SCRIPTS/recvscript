@@ -1,0 +1,24 @@
+Script started on 2021-04-09 16:08:39+05:30 [TERM="xterm-256color" TTY="/dev/pts/4" COLUMNS="101" LINES="55"]
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ exit[C./kdc -p 12345 -o out.txt -f pwd.txt[Cexit[K[C./kdc -p 12345 -o out.txt -f pwd.txt[Cexit[K[K[K[K[K./client -n manu -m R -s outenc.txt -o outfile.txt -a 127.0.0.1 -p 12345
+Are you a new client(y/n): y
+Please register with KDC....
+Enter password(number of characters-12): manu
+Enter name(a-z, max. string length-12): manu
+Registration Succesful!! :)
+Reciever listening on port 60000...
+Waiting for connection from another client.......
+Connection from  ('127.0.0.1', 54220)
+Enter your password: manu
+^CTraceback (most recent call last):
+  File "./client", line 149, in <module>
+    main()
+  File "./client", line 121, in main
+    (client_connection_socket, address) = r.accept()
+  File "/usr/lib/python3.8/socket.py", line 292, in accept
+    fd, addr = self._accept()
+KeyboardInterrupt
+
+]0;manu@manu-HP-Pavilion-Laptop-15-cs0xxx: ~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[01;32mmanu@manu-HP-Pavilion-Laptop-15-cs0xxx[00m:[01;34m~/Desktop/SEM 4/Network Security CS6500/ASSIGNMENTS/LAB3/LAB3[00m$ exit
+exit
+
+Script done on 2021-04-09 16:10:01+05:30 [COMMAND_EXIT_CODE="130"]
