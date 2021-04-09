@@ -20,6 +20,14 @@ def md5_hash(plain_text: str) -> bytes:
     return base64_hashed_pass_bytes
 
 
+def decrypt_msg(secret_key: bytes, msg_to_decrypt: str) -> dict:
+    f = Fernet(secret_key)
+    encrypted_msg_to_sender = json.dumps(msg_to_decrypt).encode('utf-8')
+    decrypted_response = f.decrypt(encrypted_msg_to_sender)
+    decrypted_response = json.loads(decrypted_response)
+    return decrypted_response
+
+
 def encrypt_msg(secret_key: bytes, msg_to_encrypt: dict) -> str:
     f = Fernet(secret_key)
     json_format_msg = json.dumps(msg_to_encrypt).encode('utf-8')

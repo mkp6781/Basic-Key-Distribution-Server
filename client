@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
+from base64 import b64decode
 from cryptography.fernet import Fernet
-from helper import derive_key, encrypt_msg, send_message, md5_hash
+from helper import derive_key, decrypt_msg, encrypt_msg, send_message, md5_hash
 import json
 import getopt
 import random
@@ -49,30 +50,16 @@ def main():
         if new_client == "y":
             # Registration with KDC
             print("Please register with KDC....")
-            # u_id = input("Enter user id(integer): ")
-            # ip = input("Enter ip address(15 characters max): ")
-            # tcp_port = input("Enter port number: ")
-            # passwd = input("Enter password(number of characters-12): ")
-            # name = input("Enter name(a-z, max. string length-12): ")
-            # data = {
-            #     'type': 'Registration',
-            #     'code': 301,
-            #     'user_id': int(u_id),
-            #     'ip': ip,
-            #     'tcp_port': int(tcp_port),
-            #     'passwd': passwd,
-            #     'name': name
-            # }
-            # Hardcoded values-for testing
+            passwd = input("Enter password(number of characters-12): ")
+            name = input("Enter name(a-z, max. string length-12): ")
             data = {
                 'type': 'Registration',
                 'code': 301,
-                'user_id': 1, #int(u_id),
-                'ip': "10.1.1.1", #ip
-                'tcp_port': 12314, #int(tcp_port),
-                'passwd': 'jaskd', #passwd,
-                'name': 'tom' #name
+                'passwd': passwd,
+                'name': name
             }
+            if client_a_role == "R":
+                data['port_no'] = '60000'
             send_message(data, s)
             response = s.recv(1024)
             response = json.loads(response)
@@ -103,16 +90,58 @@ def main():
                 send_message(data, s)
                 response = json.loads(s.recv(1024))
                 if response['code'] == 306:
-                    f = Fernet(secret_key)
-                    encrypted_msg_to_sender = json.dumps(response['msg_to_sender_encrypted']).encode('utf-8')
-                    decrypted_response = f.decrypt(encrypted_msg_to_sender)
-                    decrypted_response = json.loads(decrypted_response)
-                    print(f"This is the secret key: {decrypted_response['session_key']}")
+                    # Reading message to be delivered.
+                    message = dict()
+                    with open(inputfile, "r") as infile:
+                        message['content'] = infile.read()
+
+                    decrypted_response = decrypt_msg(secret_key, response['msg_to_sender_encrypted'])
+                    session_key = decrypted_response['session_key']
+                    session_key_bytes = bytes(session_key, 'utf-8')
+                    encrypted_msg = encrypt_msg(session_key_bytes, message['content'])
+
+                    #encrypting message to be delivered using session key.
                     message_to_reciever = {
                         'code': 309,
                         'to_reciever': response['msg_to_reciever_encrypted'],
-                        'sender': client_a
+                        'sender': client_a,
+                        'message': encrypted_msg
                     }
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sender:
+                    sender.connect(('127.0.0.1', 60000))
+                    send_message(message_to_reciever, sender)
+
+    if client_a_role == "R":
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as r:
+            r.bind(('localhost', 60000))
+            r.listen(5)
+            print(f"Reciever listening on port 60000...")
+            print("Waiting for connection from another client.......")
+            while True:
+                (client_connection_socket, address) = r.accept()
+                print('Connection from ', address)
+                while True:
+                    data = client_connection_socket.recv(1024)
+                    if not data:
+                        break
+                    data = json.loads(data)
+                    if data['code'] == 309:
+                        passwd = input("Enter your password: ")
+                        plain_pass = passwd+client_a
+                        salt = md5_hash(plain_pass)
+                        secret_key = derive_key(salt)
+
+                        # Displaying all recieved encrypted content.
+                        with open(outenc, "w") as enc_out:
+                            enc_out.write(json.dumps(data))
+
+                        decrypted_response = decrypt_msg(secret_key, data['to_reciever'])
+                        session_key = decrypted_response['session_key']
+                        decrypted_msg_from_sender = decrypt_msg(session_key, data['message'])
+
+                        # Displaying decrypted message content.
+                        with open(outputfile, "w") as output:
+                            output.write(str(decrypted_msg_from_sender))
 
 
 if __name__ == "__main__":
